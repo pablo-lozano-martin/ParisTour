@@ -1,0 +1,1758 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>En París con Cris</title>
+    
+    <!-- Mapbox GL JS CSS -->
+    <link href='https://api.mapbox.com/mapbox-gl-js/v2.14.1/mapbox-gl.css' rel='stylesheet' />
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+    
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- Custom CSS -->
+    <style>
+        :root {
+            --primary-color: #3f51b5;
+            --primary-dark: #303f9f;
+            --primary-light: #c5cae9;
+            --accent-color: #ff4081;
+            --text-primary: #212121;
+            --text-secondary: #757575;
+            --divider-color: #bdbdbd;
+            --background-light: #f5f5f5;
+            --background-white: #ffffff;
+            --shadow-color: rgba(0, 0, 0, 0.1);
+            --transition-speed: 0.3s;
+        }
+
+        body, html {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            width: 100%;
+            font-family: 'Montserrat', sans-serif;
+            overflow: hidden;
+            color: var(--text-primary);
+            background-color: var(--background-light);
+        }
+
+        /* Main layout */
+        .app-container {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            width: 100%;
+        }
+
+        /* Header styling */
+        header {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 0.8rem 1.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 6px var(--shadow-color);
+            z-index: 10;
+        }
+
+        .app-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.5rem;
+            margin: 0;
+            display: flex;
+            align-items: center;
+        }
+        
+        .app-title i {
+            margin-right: 10px;
+        }
+
+        .header-controls {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .search-container {
+            position: relative;
+            margin-right: 10px;
+        }
+
+        .search-container input {
+            padding: 8px 15px 8px 35px;
+            border-radius: 20px;
+            border: none;
+            background: rgba(255, 255, 255, 0.9);
+            width: 200px;
+            font-family: inherit;
+            font-size: 0.9rem;
+            transition: all var(--transition-speed) ease;
+        }
+
+        .search-container input:focus {
+            width: 240px;
+            outline: none;
+            box-shadow: 0 0 0 2px var(--primary-light);
+        }
+
+        .search-container i {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-secondary);
+        }
+
+        .theme-toggle {
+            background: none;
+            border: none;
+            color: white;
+            cursor: pointer;
+            font-size: 1.2rem;
+            padding: 8px;
+            border-radius: 50%;
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background-color var(--transition-speed) ease;
+        }
+
+        .theme-toggle:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+
+        /* Content area */
+        .content-container {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
+        }
+
+        /* Sidebar styling */
+        .sidebar {
+            width: 320px;
+            background-color: var(--background-white);
+            box-shadow: 2px 0 5px var(--shadow-color);
+            display: flex;
+            flex-direction: column;
+            transition: transform var(--transition-speed) ease;
+            position: relative;
+            z-index: 5;
+        }
+
+        .sidebar-header {
+            padding: 1.2rem;
+            border-bottom: 1px solid var(--divider-color);
+            background-color: var(--primary-light);
+        }
+
+        .sidebar-title {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 0;
+            font-weight: 600;
+            color: var(--primary-dark);
+        }
+
+        .sidebar-toggle {
+            background: none;
+            border: none;
+            color: var(--primary-dark);
+            cursor: pointer;
+            font-size: 1.2rem;
+            padding: 5px;
+            display: none;
+        }
+
+        .destination-list-container {
+            flex: 1;
+            overflow-y: auto;
+            padding: 0.5rem;
+        }
+
+        .destination-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .destination-card {
+            background-color: var(--background-white);
+            border-radius: 8px;
+            margin-bottom: 10px;
+            box-shadow: 0 2px 4px var(--shadow-color);
+            transition: transform var(--transition-speed) ease, box-shadow var(--transition-speed) ease;
+            overflow: hidden;
+            cursor: pointer;
+        }
+
+        .destination-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px var(--shadow-color);
+        }
+
+        .destination-card.active {
+            border-left: 4px solid var(--accent-color);
+        }
+
+        .destination-content {
+            display: flex;
+            align-items: center;
+            padding: 12px 15px;
+        }
+
+        .destination-icon {
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: var(--primary-light);
+            color: var(--primary-dark);
+            border-radius: 50%;
+            margin-right: 12px;
+            flex-shrink: 0;
+        }
+
+        .destination-info {
+            flex: 1;
+        }
+
+        .destination-name {
+            font-weight: 600;
+            margin: 0 0 3px 0;
+            color: var(--text-primary);
+        }
+
+        .destination-meta {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+        }
+
+        /* Map container */
+        .map-container {
+            flex: 1;
+            position: relative;
+        }
+
+        #map {
+            width: 100%;
+            height: 100%;
+        }
+
+        /* Map controls */
+        .map-controls {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            z-index: 2;
+        }
+
+        .map-btn {
+            background-color: white;
+            border: none;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 2px 4px var(--shadow-color);
+            color: var(--primary-dark);
+            transition: all var(--transition-speed) ease;
+        }
+
+        .map-btn:hover {
+            background-color: var(--primary-light);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px var(--shadow-color);
+        }
+
+        /* Destination detail panel */
+        .detail-panel {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px var(--shadow-color);
+            padding: 15px;
+            max-width: 350px;
+            transform: translateY(150%);
+            transition: transform var(--transition-speed) ease;
+            z-index: 3;
+        }
+
+        .detail-panel.visible {
+            transform: translateY(0);
+        }
+
+        .detail-panel h3 {
+            margin: 0 0 10px 0;
+            font-family: 'Playfair Display', serif;
+            color: var(--primary-dark);
+        }
+
+        .detail-panel p {
+            margin: 8px 0;
+            font-size: 0.9rem;
+            line-height: 1.5;
+        }
+
+        .detail-close {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: none;
+            border: none;
+            font-size: 1.1rem;
+            cursor: pointer;
+            color: var(--text-secondary);
+        }
+
+        /* Loading spinner */
+        .loader {
+            display: none;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 50px;
+            height: 50px;
+            border: 5px solid var(--primary-light);
+            border-top: 5px solid var(--primary-color);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            z-index: 5;
+        }
+
+        @keyframes spin {
+            0% { transform: translate(-50%, -50%) rotate(0deg); }
+            100% { transform: translate(-50%, -50%) rotate(360deg); }
+        }
+
+        /* Toast notification */
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%) translateY(100px);
+            background-color: var(--primary-dark);
+            color: white;
+            padding: 12px 20px;
+            border-radius: 4px;
+            box-shadow: 0 4px 8px var(--shadow-color);
+            z-index: 100;
+            opacity: 0;
+            transition: transform 0.3s ease, opacity 0.3s ease;
+        }
+
+        .toast.show {
+            transform: translateX(-50%) translateY(0);
+            opacity: 1;
+        }
+
+        /* Responsive design */
+        @media (max-width: 768px) {
+            .sidebar {
+                position: absolute;
+                height: 100%;
+                transform: translateX(-100%);
+            }
+            
+            .sidebar.open {
+                transform: translateX(0);
+            }
+            
+            .sidebar-toggle {
+                display: block;
+                position: absolute;
+                right: -40px;
+                top: 10px;
+                background: white;
+                border-radius: 0 4px 4px 0;
+                padding: 8px;
+                box-shadow: 2px 0 5px var(--shadow-color);
+            }
+            
+            .search-container input {
+                width: 150px;
+            }
+            
+            .search-container input:focus {
+                width: 180px;
+            }
+            
+            .app-title span {
+                display: none;
+            }
+        }
+        
+        /* Dark theme */
+        .dark-theme {
+            --primary-color: #303f9f;
+            --primary-dark: #1a237e;
+            --primary-light: #7986cb;
+            --accent-color: #ff80ab;
+            --text-primary: #f5f5f5;
+            --text-secondary: #bdbdbd;
+            --divider-color: #424242;
+            --background-light: #121212;
+            --background-white: #1e1e1e;
+            --shadow-color: rgba(0, 0, 0, 0.3);
+        }
+
+        /* Girlie theme */
+        .girlie-theme {
+            --primary-color: #ff80ab;
+            --primary-dark: #f06292;
+            --primary-light: #ffb2dd;
+            --accent-color: #f8bbd0;
+            --text-primary: #880e4f;
+            --text-secondary: #ad1457;
+            --divider-color: #fce4ec;
+            --background-light: #fff9fa;
+            --background-white: #ffffff;
+            --shadow-color: rgba(244, 143, 177, 0.3);
+            font-family: 'Montserrat', sans-serif;
+        }
+
+        .girlie-theme header {
+            background: linear-gradient(135deg, #ff80ab, #f48fb1);
+        }
+        
+        .girlie-theme .sidebar-header {
+            background: linear-gradient(135deg, #f8bbd0, #ffb2dd);
+        }
+        
+        .girlie-theme .destination-card {
+            border-radius: 15px;
+            border: 1px solid #fce4ec;
+            background-color: white;
+        }
+        
+        .girlie-theme .destination-icon {
+            background-color: #ffb2dd;
+            color: #880e4f;
+        }
+        
+        .girlie-theme .destination-card.active {
+            border-left: 4px solid #f06292;
+            background-color: #fff9fa;
+        }
+        
+        .girlie-theme .map-btn {
+            background-color: #fff9fa;
+            color: #f06292;
+            border: 2px solid #ffb2dd;
+        }
+        
+        .girlie-theme .map-btn:hover {
+            background-color: #ffb2dd;
+        }
+        
+        .girlie-theme .detail-panel {
+            background-color: white;
+            border: 2px solid #ffb2dd;
+            border-radius: 15px;
+            box-shadow: 0 4px 15px var(--shadow-color);
+        }
+        
+        .girlie-theme .detail-panel h3 {
+            color: #ad1457;
+        }
+        
+        .girlie-theme input {
+            border: 2px solid #ffb2dd;
+        }
+        
+        .girlie-theme .toast {
+            background-color: #f06292;
+            border: 2px solid #ffb2dd;
+        }
+
+        .girlie-theme .theme-toggle {
+            background-color: rgba(255, 255, 255, 0.2);
+        }
+        
+        .girlie-theme .sidebar-title {
+            color: #880e4f;
+        }
+
+        /* Mapbox attribution control styling */
+        .mapboxgl-ctrl-bottom-right {
+            z-index: 10;
+        }
+        .mapboxgl-ctrl-bottom-left {
+            z-index: 10;
+        }
+
+        /* AirBnB marker styling */
+        .airbnb-marker {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: #ff5a5f;
+            border: 3px solid white;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.3);
+            cursor: pointer;
+            animation: pulse 2s infinite;
+            z-index: 10;
+        }
+
+        .girlie-theme .airbnb-marker {
+            background: linear-gradient(135deg, #ff80ab, #ff5a5f);
+            border: 3px solid #fff9fa;
+            box-shadow: 0 3px 10px rgba(244, 143, 177, 0.5);
+        }
+
+        @keyframes pulse {
+            0% {
+                transform: scale(1);
+                box-shadow: 0 3px 10px rgba(0, 0, 0, 0.3);
+            }
+            50% {
+                transform: scale(1.1);
+                box-shadow: 0 5px 15px rgba(0, 0, 0, 0.4);
+            }
+            100% {
+                transform: scale(1);
+                box-shadow: 0 3px 10px rgba(0, 0, 0, 0.3);
+            }
+        }
+        
+        /* Custom popup styling */
+        .airbnb-popup .mapboxgl-popup-content {
+            background-color: white;
+            border-radius: 12px;
+            padding: 15px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+        }
+        
+        .airbnb-popup .mapboxgl-popup-tip {
+            border-top-color: white;
+        }
+        
+        .girlie-theme .airbnb-popup .mapboxgl-popup-content {
+            background-color: #fff9fa;
+            border: 2px solid #ffb2dd;
+            box-shadow: 0 4px 15px rgba(244, 143, 177, 0.3);
+        }
+        
+        .airbnb-popup-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 16px;
+            margin: 0 0 8px 0;
+            color: var(--primary-dark);
+        }
+        
+        .girlie-theme .airbnb-popup-title {
+            color: #f06292;
+        }
+        
+        .airbnb-popup-text {
+            font-size: 14px;
+            margin: 0;
+            color: var(--text-primary);
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <!-- Header -->
+        <header>
+            <h1 class="app-title">
+                <i class="fas fa-map-marked-alt"></i>
+                <span>En París con Cris</span>
+            </h1>
+            <div class="header-controls">
+                <div class="search-container">
+                    <i class="fas fa-search"></i>
+                    <input type="text" id="search-input" placeholder="Buscar lugares...">
+                </div>
+                <button class="theme-toggle" id="theme-toggle" title="Activar modo girlie">
+                    <i class="fas fa-seedling"></i>
+                </button>
+            </div>
+        </header>
+
+        <!-- Content -->
+        <div class="content-container">
+            <!-- Sidebar -->
+            <div class="sidebar" id="sidebar">
+                <button class="sidebar-toggle" id="sidebar-toggle">
+                    <i class="fas fa-chevron-right"></i>
+                </button>
+                <div class="sidebar-header">
+                    <h2 class="sidebar-title">
+                        Lugares de interés
+                        <span id="destination-count" class="destination-count"></span>
+                    </h2>
+                </div>
+                <div class="destination-list-container">
+                    <ul id="destination-list" class="destination-list">
+                        <!-- Destinations will be populated by JavaScript -->
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Map -->
+            <div class="map-container">
+                <div id="map"></div>
+                
+                <!-- Map Controls -->
+                <div class="map-controls">
+                    <button class="map-btn" id="reset-view" title="Vista inicial">
+                        <i class="fas fa-home"></i>
+                    </button>
+                    <button class="map-btn" id="toggle-buildings" title="Alternar edificios 3D">
+                        <i class="fas fa-building"></i>
+                    </button>
+                </div>
+                
+                <!-- Destination Detail Panel -->
+                <div class="detail-panel" id="detail-panel">
+                    <button class="detail-close" id="detail-close">
+                        <i class="fas fa-times"></i>
+                    </button>
+                    <h3 id="detail-title">Nombre del Lugar</h3>
+                    <p id="detail-description">La descripción del lugar aparecerá aquí.</p>
+                </div>
+                
+                <!-- Loading Spinner -->
+                <div class="loader" id="loader"></div>
+            </div>
+        </div>
+        
+        <!-- Toast Notification -->
+        <div class="toast" id="toast">¡Bienvenido a París!</div>
+    </div>
+
+    <!-- Libraries -->
+    <script src='https://api.mapbox.com/mapbox-gl-js/v2.14.1/mapbox-gl.js'></script>
+    <script src='https://unpkg.com/three@0.156.1/build/three.min.js'></script>
+    <script src='https://cdn.jsdelivr.net/gh/jscastro76/threebox@v.2.2.2/dist/threebox.min.js' type="text/javascript"></script>
+
+    <!-- Custom JavaScript -->
+    <script>
+        // 1. === IMPORTANT: Replace with your Mapbox Access Token ===
+        mapboxgl.accessToken = 'INSERT_MAPOBOX_ACCESS_TOKEN_HERE';
+        // ==========================================================
+
+        // 2. Define Paris Destinations with additional data
+        const normalDestinations = [
+            { 
+                name: "Torre Eiffel", 
+                coords: [2.2945, 48.8584], 
+                zoom: 16.5, 
+                pitch: 65,
+                icon: "fa-tower-observation",
+                description: "Icónica torre de hierro en el Campo de Marte. Completada en 1889, tiene 324 metros de altura y ofrece vistas panorámicas de París."
+            },
+            { 
+                name: "Museo del Louvre", 
+                coords: [2.3376, 48.8606], 
+                zoom: 16.5, 
+                pitch: 60,
+                icon: "fa-building-columns",
+                description: "El museo de arte más grande del mundo alberga más de 38.000 piezas, incluyendo la Mona Lisa y la Venus de Milo. Ubicado en un histórico palacio."
+            },
+            { 
+                name: "Catedral de Notre Dame", 
+                coords: [2.3499, 48.8530], 
+                zoom: 16.5, 
+                pitch: 60,
+                icon: "fa-church",
+                description: "Catedral católica medieval en la Île de la Cité, conocida por su arquitectura gótica francesa y sus famosas gárgolas."
+            },
+            { 
+                name: "Arco del Triunfo", 
+                coords: [2.2950, 48.8738], 
+                zoom: 16.5, 
+                pitch: 60,
+                icon: "fa-archway",
+                description: "Icónico arco triunfal que honra a quienes lucharon por Francia, especialmente en las Guerras Napoleónicas. Ofrece vistas a lo largo de los Campos Elíseos."
+            },
+            { 
+                name: "Basílica del Sacré-Cœur", 
+                coords: [2.3430, 48.8866], 
+                zoom: 16.5, 
+                pitch: 60,
+                icon: "fa-church",
+                description: "Basílica católica romana en el punto más alto de París. Famosa por su cúpula blanca y impresionantes vistas de la ciudad desde Montmartre."
+            },
+            { 
+                name: "Museo de Orsay", 
+                coords: [2.3266, 48.8600], 
+                zoom: 16.5, 
+                pitch: 60,
+                icon: "fa-building-columns",
+                description: "Museo ubicado en la antigua estación de tren de Orsay. Famoso por su colección de obras maestras impresionistas y postimpresionistas."
+            },
+            { 
+                name: "Sainte-Chapelle", 
+                coords: [2.3450, 48.8554], 
+                zoom: 17, 
+                pitch: 60,
+                icon: "fa-church",
+                description: "Capilla gótica con espectaculares vidrieras. Construida en el siglo XIII para albergar reliquias cristianas, incluida la corona de espinas de Cristo."
+            },
+            { 
+                name: "Centre Pompidou", 
+                coords: [2.3522, 48.8606], 
+                zoom: 16.5, 
+                pitch: 60,
+                icon: "fa-building",
+                description: "Museo de arte moderno en un edificio de alta tecnología con el interior hacia afuera. Alberga la colección más grande de Europa de arte moderno y contemporáneo."
+            },
+            { 
+                name: "Jardines de Luxemburgo", 
+                coords: [2.3372, 48.8462], 
+                zoom: 15.5, 
+                pitch: 45,
+                icon: "fa-tree",
+                description: "Inspirados en los Jardines Boboli de Florencia. Presenta jardines formales, fuentes y el Palacio de Luxemburgo, sede del Senado francés."
+            },
+            { 
+                name: "Montmartre", 
+                coords: [2.3431, 48.8867], 
+                zoom: 15.5, 
+                pitch: 50,
+                icon: "fa-mountain-city",
+                description: "Histórico barrio en una colina en el distrito 18, conocido por su ambiente bohemio, la basílica del Sacré-Cœur y las vistas panorámicas de la ciudad."
+            },
+            { 
+                name: "Plaza de la Concordia", 
+                coords: [2.3211, 48.8656], 
+                zoom: 16.5, 
+                pitch: 55,
+                icon: "fa-square",
+                description: "Una de las plazas principales de París, ubicada al final de los Campos Elíseos, con el Obelisco de Luxor en su centro y hermosas fuentes."
+            },
+            { 
+                name: "Les Invalides", 
+                coords: [2.3126, 48.8564], 
+                zoom: 16, 
+                pitch: 60,
+                icon: "fa-landmark",
+                description: "Complejo de edificios con el Museo del Ejército y la tumba de Napoleón Bonaparte bajo su distintiva cúpula dorada."
+            },
+            { 
+                name: "Panteón", 
+                coords: [2.3465, 48.8462], 
+                zoom: 16.5, 
+                pitch: 60,
+                icon: "fa-building-columns",
+                description: "Monumento neoclásico y lugar de descanso de muchos intelectuales franceses notables, incluidos Voltaire, Rousseau y Marie Curie."
+            },
+            { 
+                name: "Campos Elíseos", 
+                coords: [2.3073, 48.8699], 
+                zoom: 15.5, 
+                pitch: 50,
+                icon: "fa-road",
+                description: "Prestigiosa avenida que se extiende desde la Plaza de la Concordia hasta el Arco del Triunfo, famosa por sus tiendas de lujo y cafés."
+            },
+            { 
+                name: "Palais Garnier", 
+                coords: [2.3318, 48.8719], 
+                zoom: 16.5, 
+                pitch: 60,
+                icon: "fa-masks-theater",
+                description: "Opulenta casa de ópera del siglo XIX, famosa por su arquitectura neobarroca y su gran escalera con influencias de la ópera 'El Fantasma de la Ópera'."
+            },
+            { 
+                name: "Palacio de Versalles", 
+                coords: [2.1204, 48.8049], 
+                zoom: 15, 
+                pitch: 50,
+                icon: "fa-chess-rook",
+                description: "Antiguo palacio real a las afueras de París, símbolo del absolutismo francés y sede de la corte real durante el reinado de Luis XIV."
+            },
+            { 
+                name: "Isla de la Cité", 
+                coords: [2.3470, 48.8550], 
+                zoom: 16, 
+                pitch: 50,
+                icon: "fa-landmark-flag",
+                description: "Isla en el río Sena considerada el centro histórico de París, hogar de Notre-Dame, Sainte-Chapelle y la Conciergerie."
+            },
+            { 
+                name: "Conciergerie", 
+                coords: [2.3459, 48.8559], 
+                zoom: 16.5, 
+                pitch: 60,
+                icon: "fa-landmark",
+                description: "Antiguo palacio real convertido en prisión durante la Revolución Francesa, donde María Antonieta estuvo encarcelada."
+            },
+            { 
+                name: "Museo Picasso", 
+                coords: [2.3616, 48.8599], 
+                zoom: 17, 
+                pitch: 60,
+                icon: "fa-palette",
+                description: "Ubicado en el Hôtel Salé en el Marais, alberga una de las colecciones más grandes de obras de Pablo Picasso."
+            },
+            { 
+                name: "Puente Alexandre III", 
+                coords: [2.3136, 48.8639], 
+                zoom: 16.5, 
+                pitch: 55,
+                icon: "fa-bridge",
+                description: "Elegante puente arqueado sobre el Sena, adornado con farolas art nouveau y esculturas doradas, con vistas a los Inválidos y el Grand Palais."
+            },
+            { 
+                name: "Grand Palais", 
+                coords: [2.3131, 48.8660], 
+                zoom: 16.5, 
+                pitch: 60,
+                icon: "fa-building",
+                description: "Impresionante edificio de la exposición con su distintiva cúpula de cristal y acero, que alberga exposiciones importantes y eventos culturales."
+            },
+            { 
+                name: "Petit Palais", 
+                coords: [2.3147, 48.8660], 
+                zoom: 16.5, 
+                pitch: 60,
+                icon: "fa-building-columns",
+                description: "Elegante museo de bellas artes, construido para la Exposición Universal de 1900, que alberga una colección diversa de pinturas, esculturas y objetos decorativos."
+            },
+            { 
+                name: "Canal Saint-Martin", 
+                coords: [2.3635, 48.8715], 
+                zoom: 15.5, 
+                pitch: 45,
+                icon: "fa-water",
+                description: "Pintoresco canal con puentes de hierro y esclusas, bordeado de cafés de moda y boutiques, popular entre los parisinos para picnics y paseos."
+            },
+            { 
+                name: "Cementerio de Père Lachaise", 
+                coords: [2.3935, 48.8614], 
+                zoom: 15, 
+                pitch: 45,
+                icon: "fa-monument",
+                description: "El cementerio más visitado del mundo, lugar de descanso de numerosas figuras célebres como Oscar Wilde, Jim Morrison y Édith Piaf."
+            },
+            { 
+                name: "Ópera Bastilla", 
+                coords: [2.3700, 48.8522], 
+                zoom: 16.5, 
+                pitch: 60,
+                icon: "fa-masks-theater",
+                description: "Principal casa de ópera moderna de París, inaugurada en 1989 para conmemorar el bicentenario de la Revolución Francesa."
+            },
+            { 
+                name: "Plaza de los Vosgos", 
+                coords: [2.3655, 48.8556], 
+                zoom: 17, 
+                pitch: 50,
+                icon: "fa-square",
+                description: "La plaza real más antigua de París, con arquitectura uniforme del siglo XVII, arcadas elegantes y un hermoso jardín central."
+            },
+            { 
+                name: "Museo Rodin", 
+                coords: [2.3160, 48.8553], 
+                zoom: 16.5, 
+                pitch: 60,
+                icon: "fa-palette",
+                description: "Museo dedicado a las obras del escultor Auguste Rodin, ubicado en el Hôtel Biron con un hermoso jardín de esculturas."
+            },
+            { 
+                name: "Palacio de Tokio", 
+                coords: [2.2975, 48.8645], 
+                zoom: 16.5, 
+                pitch: 60,
+                icon: "fa-building",
+                description: "Centro de arte contemporáneo con exposiciones vanguardistas, restaurantes y una vista espectacular del Sena y la Torre Eiffel."
+            },
+            { 
+                name: "Catacumbas de París", 
+                coords: [2.3324, 48.8339], 
+                zoom: 17, 
+                pitch: 60,
+                icon: "fa-skull-crossbones",
+                description: "Red subterránea de túneles y osarios que albergan los restos de más de seis millones de parisinos, creados para aliviar los cementerios desbordados."
+            },
+            { 
+                name: "Museo del Ejército", 
+                coords: [2.3126, 48.8564], // Same as Les Invalides
+                zoom: 16, 
+                pitch: 60,
+                icon: "fa-shield-halved",
+                description: "Extensa colección de armas, armaduras y artefactos militares desde la Edad Media hasta la Segunda Guerra Mundial, incluyendo la tumba de Napoleón."
+            },
+            { 
+                name: "La Defense", 
+                coords: [2.2360, 48.8927], 
+                zoom: 15, 
+                pitch: 50,
+                icon: "fa-city",
+                description: "Distrito de negocios ultramoderno con impresionantes rascacielos, el Grande Arche y esculturas públicas contemporáneas."
+            },
+            { 
+                name: "Barrio Latino", 
+                coords: [2.3438, 48.8488], 
+                zoom: 15.5, 
+                pitch: 50,
+                icon: "fa-book-open-reader",
+                description: "Histórico distrito universitario con ambiente animado, librerías, cafés históricos y la famosa Universidad de la Sorbona."
+            },
+            { 
+                name: "Museo de la Orangerie", 
+                coords: [2.3227, 48.8638], 
+                zoom: 17, 
+                pitch: 60,
+                icon: "fa-palette",
+                description: "Galería que alberga los famosos murales de nenúfares de Monet y obras impresionistas de Renoir, Cézanne y otros."
+            },
+            { 
+                name: "Fundación Louis Vuitton", 
+                coords: [2.2635, 48.8766], 
+                zoom: 16, 
+                pitch: 60,
+                icon: "fa-building",
+                description: "Impresionante museo de arte contemporáneo diseñado por Frank Gehry, con exposiciones rotativas y arquitectura innovadora."
+            },
+            { 
+                name: "Parc des Buttes-Chaumont", 
+                coords: [2.3829, 48.8769], 
+                zoom: 15, 
+                pitch: 45,
+                icon: "fa-tree",
+                description: "Extenso parque con colinas empinadas, un lago, cascadas, un templo y vistas panorámicas de París."
+            },
+            { 
+                name: "Mercado de Pulgas de Saint-Ouen", 
+                coords: [2.3435, 48.8997], 
+                zoom: 15, 
+                pitch: 45,
+                icon: "fa-store",
+                description: "El mercado de antigüedades al aire libre más grande del mundo, con miles de vendedores que ofrecen tesoros vintage y antigüedades."
+            },
+            { 
+                name: "La Madeleine", 
+                coords: [2.3245, 48.8700], 
+                zoom: 16.5, 
+                pitch: 60,
+                icon: "fa-church",
+                description: "Impresionante iglesia neoclásica diseñada como un templo griego, dedicada a María Magdalena."
+            },
+            { 
+                name: "Museo de Cluny", 
+                coords: [2.3440, 48.8504], 
+                zoom: 16.5, 
+                pitch: 60,
+                icon: "fa-building-columns",
+                description: "Museo de la Edad Media, ubicado en un edificio medieval que alberga la famosa serie de tapices 'La Dama y el Unicornio'."
+            },
+            { 
+                name: "Isla de San Luis", 
+                coords: [2.3560, 48.8519], 
+                zoom: 16, 
+                pitch: 50,
+                icon: "fa-map-pin",
+                description: "Pintoresca isla en el Sena con elegantes mansiones del siglo XVII, calles estrechas y la famosa heladería Berthillon."
+            },
+            { 
+                name: "Moulin Rouge", 
+                coords: [2.3323, 48.8841], 
+                zoom: 17, 
+                pitch: 60,
+                icon: "fa-masks-theater", // Changed from wind-turbine to reflect cabaret
+                description: "Histórico cabaret famoso por ser el lugar de nacimiento del moderno can-can, con espectáculos deslumbrantes y un ambiente vibrante."
+            },
+            { 
+                name: "Barrio Le Marais", 
+                coords: [2.3625, 48.8575], 
+                zoom: 15.5, 
+                pitch: 50,
+                icon: "fa-building",
+                description: "Histórico barrio con mansiones medievales, galerías de arte moderno, boutiques de moda y una animada escena culinaria."
+            },
+            { 
+                name: "Centro Cultural Georges Pompidou", // Note: Same as Centre Pompidou
+                coords: [2.3522, 48.8606], 
+                zoom: 16.5, 
+                pitch: 60,
+                icon: "fa-building",
+                description: "Centro multicultural que alberga el Museo Nacional de Arte Moderno en un edificio vanguardista diseñado por Renzo Piano y Richard Rogers."
+            }
+        ];
+
+        const girlieDestinations = [
+            { 
+                name: "Café de Flore", 
+                coords: [2.3325, 48.8539], 
+                zoom: 17, 
+                pitch: 60,
+                icon: "fa-mug-hot",
+                description: "Icónico café en Saint-Germain-des-Prés, conocido por su historia y hermoso ambiente. Lugar perfecto para observar a la gente y disfrutar de una deliciosa pastelería francesa.",
+            },
+            { 
+                name: "Angelina", 
+                coords: [2.3284, 48.8649], 
+                zoom: 17, 
+                pitch: 60,
+                icon: "fa-mug-hot",
+                description: "Famoso por su decadente chocolate caliente y ambiente Belle Epoque, perfecto para un brunch elegante. ¡El chocolate caliente es espeso, rico y absolutamente divino!"
+            },
+            { 
+                name: "La Maison Rose", 
+                coords: [2.3395, 48.8876], 
+                zoom: 17.5, 
+                pitch: 60,
+                icon: "fa-utensils",
+                description: "Icónico café en Montmartre con una distintiva fachada rosa, perfecto para un bocado relajante o un café. ¡Este encantador edificio rosa es simplemente adorable!"
+            },
+            { 
+                name: "Shakespeare and Company", 
+                coords: [2.3470, 48.8525], 
+                zoom: 17.5, 
+                pitch: 60,
+                icon: "fa-book",
+                description: "Icónica librería en inglés con un interior encantador y una rica historia. Un refugio literario con rincones acogedores y una atmósfera encantadora."
+            },
+            { 
+                name: "Musée de Montmartre", 
+                coords: [2.3396, 48.8877], 
+                zoom: 17, 
+                pitch: 60,
+                icon: "fa-palette",
+                description: "Una joya escondida que muestra el alma bohemia de París, con impresionantes colecciones de arte y jardines tranquilos. Un lugar verdaderamente mágico para escapar de las multitudes."
+            },
+            { 
+                name: "Galeries Lafayette", 
+                coords: [2.3316, 48.8735], 
+                zoom: 16.5, 
+                pitch: 60,
+                icon: "fa-bag-shopping",
+                description: "Elegante centro comercial con un impresionante techo de vidrio emplomado y una terraza en la azotea con vistas a París. ¡Paraíso de compras con una arquitectura impresionante!"
+            },
+            { 
+                name: "Le Consulat", 
+                coords: [2.3398, 48.8869], 
+                zoom: 17.5, 
+                pitch: 60,
+                icon: "fa-utensils",
+                description: "Ubicado en Montmartre, este restaurante ofrece un encantador lugar digno de Instagram. ¡El café más bonito con la fachada más adorable!"
+            },
+            { 
+                name: "Pink Mamma", 
+                coords: [2.3351, 48.8818], 
+                zoom: 17, 
+                pitch: 60,
+                icon: "fa-utensils",
+                description: "Un restaurante italiano de moda en Pigalle, conocido por su escalera digna de Instagram y deliciosa comida. ¡El interior está lleno de plantas y decoración rosa!"
+            },
+            { 
+                name: "Odette Paris", 
+                coords: [2.3471, 48.8522], 
+                zoom: 17.5, 
+                pitch: 60,
+                icon: "fa-cookie-bite",
+                description: "Un lindo café con una hermosa fachada, perfecto para tomar fotos. Famoso por sus deliciosos profiteroles que son tan bonitos como deliciosos."
+            },
+            { 
+                name: "Rue Crémieux", 
+                coords: [2.3718, 48.8453], 
+                zoom: 17, 
+                pitch: 55,
+                icon: "fa-road",
+                description: "Una calle colorida con encantadoras casas, a menudo comparada con Notting Hill en Londres, ideal para un paseo fotográfico. ¡Cada casa está pintada en un diferente tono pastel!"
+            },
+            { 
+                name: "Coutume Café", 
+                coords: [2.3194, 48.8517], 
+                zoom: 17, 
+                pitch: 60,
+                icon: "fa-mug-hot",
+                description: "Un lugar moderno en el distrito 7, celebrado por su café artesanal y diseño minimalista. Perfecto para los amantes del café de especialidad."
+            },
+            { 
+                name: "Fragments", 
+                coords: [2.3671, 48.8567], 
+                zoom: 17.5, 
+                pitch: 60,
+                icon: "fa-mug-hot",
+                description: "Escondido en Le Marais, este acogedor café ofrece excepcionales bebidas y un encanto rústico. Pequeño pero perfectamente formado."
+            },
+            { 
+                name: "Boot Café", 
+                coords: [2.3662, 48.8617], 
+                zoom: 18, 
+                pitch: 60,
+                icon: "fa-mug-hot",
+                description: "Un diminuto café digno de Instagram ubicado en una antigua zapatería en Le Marais. El azul de la fachada es absolutamente encantador."
+            },
+            { 
+                name: "Ten Belles", 
+                coords: [2.3642, 48.8723], 
+                zoom: 17.5, 
+                pitch: 60,
+                icon: "fa-mug-hot",
+                description: "Situado cerca del Canal Saint-Martin, es conocido por su café de calidad y ambiente relajado. Un favorito entre los locales."
+            },
+            { 
+                name: "Holybelly", 
+                coords: [2.3621, 48.8707], 
+                zoom: 17.5, 
+                pitch: 60,
+                icon: "fa-utensils",
+                description: "Un favorito en el distrito 10, que ofrece excelente café junto con abundantes opciones de brunch. Sus panqueques son legendarios."
+            },
+            { 
+                name: "Ob-La-Di", 
+                coords: [2.3620, 48.8630], 
+                zoom: 17.5, 
+                pitch: 60,
+                icon: "fa-mug-hot",
+                description: "Un elegante café en el distrito 3, conocido por su interior con estilo y delicioso toast de aguacate. La baldosa azul en la entrada es icónica."
+            },
+            { 
+                name: "Café Kitsuné", 
+                coords: [2.3374, 48.8649], 
+                zoom: 17.5, 
+                pitch: 60,
+                icon: "fa-mug-hot",
+                description: "Ubicado cerca del Palais Royal, combina estética japonesa con encanto parisino. Sus bebidas y postres son tan elegantes como su decoración."
+            },
+            { 
+                name: "Lomi", 
+                coords: [2.3545, 48.8933], 
+                zoom: 17, 
+                pitch: 60,
+                icon: "fa-mug-hot",
+                description: "Un espacioso café en el distrito 18, perfecto para entusiastas del café que buscan tazas expertamente preparadas. También tuestan su propio café."
+            },
+            { 
+                name: "KB CaféShop", 
+                coords: [2.3419, 48.8816], 
+                zoom: 17, 
+                pitch: 60,
+                icon: "fa-mug-hot",
+                description: "Localizado en South Pigalle, ofrece una amplia selección de cafés y una vibrante terraza. Un lugar perfecto para trabajar o socializar."
+            },
+            { 
+                name: "Musée de la Vie Romantique", 
+                coords: [2.3358, 48.8810], 
+                zoom: 17, 
+                pitch: 60,
+                icon: "fa-palette",
+                description: "Dedicado a la era Romántica, presenta arte, literatura y artefactos personales. La casa y el jardín son absolutamente encantadores."
+            },
+            { 
+                name: "Musée Bourdelle", 
+                coords: [2.3190, 48.8455], 
+                zoom: 16.5, 
+                pitch: 60,
+                icon: "fa-palette",
+                description: "Muestra las obras del escultor Antoine Bourdelle en su estudio preservado y jardín. Un tranquilo tesoro artístico en París."
+            },
+            { 
+                name: "Musée Zadkine", 
+                coords: [2.3318, 48.8421], 
+                zoom: 17, 
+                pitch: 60,
+                icon: "fa-palette",
+                description: "Una joya escondida dedicada a las esculturas de Ossip Zadkine, ubicada en su antigua casa. El jardín escultórico es especialmente encantador."
+            },
+            { 
+                name: "Musée Gustave Moreau", 
+                coords: [2.3357, 48.8794], 
+                zoom: 17, 
+                pitch: 60,
+                icon: "fa-palette",
+                description: "Muestra las obras del pintor simbolista en su antigua residencia. La escalera de caracol y los estudios del artista son impresionantes."
+            },
+            { 
+                name: "Maison de Balzac", 
+                coords: [2.2837, 48.8560], 
+                zoom: 17, 
+                pitch: 60,
+                icon: "fa-book-open-reader",
+                description: "Ofrece una visión de la vida y obras del renombrado escritor Honoré de Balzac. Un encantador museo literario con vistas al Sena."
+            },
+            { 
+                name: "Tuileries Garden", 
+                coords: [2.3275, 48.8637], 
+                zoom: 15.5, 
+                pitch: 45,
+                icon: "fa-tree",
+                description: "Ubicado entre el Louvre y Place de la Concorde, perfecto para paseos tranquilos. Los jardines formales y las esculturas crean un ambiente romántico."
+            },
+            { 
+                name: "Parc Monceau", 
+                coords: [2.3099, 48.8797], 
+                zoom: 16, 
+                pitch: 45,
+                icon: "fa-tree",
+                description: "Conocido por sus estatuas clásicas, estanque y atmósfera serena. Uno de los parques más elegantes y encantadores de París."
+            },
+            { 
+                name: "Jardin du Palais Royal", 
+                coords: [2.3373, 48.8651], 
+                zoom: 16.5, 
+                pitch: 50,
+                icon: "fa-tree",
+                description: "Ofrece elegantes paisajes rodeados de arcadas históricas. Un tranquilo refugio en el corazón de París con hermosas fuentes."
+            },
+            { 
+                name: "Parc de Belleville", 
+                coords: [2.3853, 48.8710], 
+                zoom: 15.5, 
+                pitch: 45,
+                icon: "fa-tree",
+                description: "Proporciona vistas panorámicas de París desde sus terrazas elevadas. Menos conocido pero con vistas espectaculares de la ciudad."
+            },
+            { 
+                name: "Square du Vert-Galant", 
+                coords: [2.3407, 48.8571], 
+                zoom: 17, 
+                pitch: 50,
+                icon: "fa-tree",
+                description: "Un lugar tranquilo en la punta de la Île de la Cité, rodeado por el Sena. Romántico y perfecto para un picnic junto al río."
+            },
+            { 
+                name: "Jardin Anne-Frank", 
+                coords: [2.3534, 48.8616], 
+                zoom: 17.5, 
+                pitch: 50,
+                icon: "fa-tree",
+                description: "Un jardín apartado en Le Marais, dedicado a la memoria de Anne Frank. Un oasis tranquilo y reflexivo en un barrio animado."
+            },
+            { 
+                name: "Jardin des Serres d'Auteuil", 
+                coords: [2.2515, 48.8471], 
+                zoom: 16, 
+                pitch: 45,
+                icon: "fa-leaf",
+                description: "Presenta invernaderos históricos con plantas y flores exóticas. Las estructuras de cristal y la colección botánica son impresionantes."
+            },
+            { 
+                name: "Le Baron Rouge", 
+                coords: [2.3780, 48.8491], 
+                zoom: 17, 
+                pitch: 60,
+                icon: "fa-wine-glass",
+                description: "Un bar de vinos tradicional en el distrito 12, conocido por su atmósfera alegre. Un auténtico bar parisino con excelente selección de vinos."
+            },
+            { 
+                name: "Septime La Cave", 
+                coords: [2.3818, 48.8535], 
+                zoom: 17.5, 
+                pitch: 60,
+                icon: "fa-wine-glass",
+                description: "Un lugar íntimo que ofrece una selección curada de vinos naturales. Pequeño pero con una increíble selección para los amantes del vino."
+            },
+            { 
+                name: "La Compagnie des Vins Surnaturels", 
+                coords: [2.3368, 48.8531], 
+                zoom: 17.5, 
+                pitch: 60,
+                icon: "fa-wine-glass",
+                description: "Ubicado en Saint-Germain, ofreciendo una extensa carta de vinos y tapas. Interior elegante y cómodo para degustar vinos excepcionales."
+            },
+            { 
+                name: "Le Verre Volé", 
+                coords: [2.3632, 48.8718], 
+                zoom: 17.5, 
+                pitch: 60,
+                icon: "fa-wine-glass",
+                description: "Un querido bar de vinos cerca del Canal Saint-Martin, especializado en vinos orgánicos. Ambiente informal con excelente comida para acompañar."
+            },
+            { 
+                name: "Frenchie Bar à Vins", 
+                coords: [2.3478, 48.8678], 
+                zoom: 17.5, 
+                pitch: 60,
+                icon: "fa-wine-glass",
+                description: "Ofrece una sofisticada selección de vinos combinados con deliciosos platillos pequeños. Un lugar elegante pero accesible."
+            }
+        ];
+
+        // 3. Global variables
+        let buildingsVisible = true;
+        let activeDestination = null;
+        let isMobile = window.innerWidth <= 768;
+        let isGirlieMode = false;
+        let currentDestinations = normalDestinations;
+
+        // AirBnB location data
+        const airbnbLocation = {
+            name: "Nuestro AirBnB",
+            coords: [2.3202882459001786, 48.832708756230524],
+            address: "4 Rue Pernety",
+            description: "¡Nuestro hogar en París!"
+        };
+
+        // 4. Initialize UI
+        document.getElementById('destination-count').textContent = `(${currentDestinations.length})`;
+
+        // 5. UI Control Functions
+        function showToast(message, duration = 3000) {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.classList.add('show');
+            
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, duration);
+        }
+
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const sidebarToggle = document.getElementById('sidebar-toggle');
+            
+            sidebar.classList.toggle('open');
+            
+            // Update toggle button icon
+            const isOpen = sidebar.classList.contains('open');
+            sidebarToggle.innerHTML = isOpen ? 
+                '<i class="fas fa-chevron-left"></i>' : 
+                '<i class="fas fa-chevron-right"></i>';
+        }
+
+        function toggleGirlieMode() {
+            const body = document.body;
+            const themeToggle = document.getElementById('theme-toggle');
+            
+            isGirlieMode = !isGirlieMode;
+            body.classList.toggle('girlie-theme', isGirlieMode);
+            
+            // Update theme button
+            themeToggle.innerHTML = isGirlieMode ? 
+                '<i class="fas fa-spa"></i>' : 
+                '<i class="fas fa-seedling"></i>';
+                
+            // Also update map style if maps support it
+            if (map) {
+                const currentStyle = map.getStyle().name;
+                if (isGirlieMode) {
+                    map.setStyle('mapbox://styles/mapbox/streets-v11');
+                    // Apply pink styling to the map
+                    setTimeout(() => {
+                        if (map.getLayer('water')) {
+                            map.setPaintProperty('water', 'fill-color', '#f8bbd0');
+                        }
+                    }, 1000);
+                } else {
+                    map.setStyle('mapbox://styles/mapbox/streets-v11');
+                }
+            }
+            
+            // Switch destinations
+            currentDestinations = isGirlieMode ? girlieDestinations : normalDestinations;
+            
+            // Refresh destinations list
+            refreshDestinationsList();
+            
+            // Refresh AirBnB marker to update its styling
+            addAirBnBMarker();
+            
+            showToast(isGirlieMode ? '🌸 ¡Modo girlie activado!' : '🗺️ Modo normal activado');
+        }
+
+        function showDestinationDetail(destination) {
+            if (!destination) return;
+            
+            const detailPanel = document.getElementById('detail-panel');
+            const detailTitle = document.getElementById('detail-title');
+            const detailDescription = document.getElementById('detail-description');
+            
+            detailTitle.textContent = destination.name;
+            detailDescription.innerHTML = `${destination.description}`;
+            
+            detailPanel.classList.add('visible');
+        }
+
+        function hideDestinationDetail() {
+            const detailPanel = document.getElementById('detail-panel');
+            detailPanel.classList.remove('visible');
+        }
+
+        function toggleBuildings() {
+            buildingsVisible = !buildingsVisible;
+            
+            // Toggle the visibility of the 3D building layer
+            map.setLayoutProperty(
+                'add-3d-buildings',
+                'visibility',
+                buildingsVisible ? 'visible' : 'none'
+            );
+            
+            showToast(buildingsVisible ? 
+                '🏙️ Edificios 3D activados' : 
+                '🏙️ Edificios 3D desactivados');
+        }
+
+        function resetMapView() {
+            // Remove any existing AirBnB marker
+            document.querySelectorAll('.airbnb-marker').forEach(marker => {
+                marker.remove();
+            });
+            
+            // Change the fly-to destination to the AirBnB location
+            map.flyTo({
+                center: airbnbLocation.coords,
+                zoom: 16,
+                pitch: 60,
+                bearing: 0,
+                essential: true
+            });
+            
+            // Clear active destination
+            setActiveDestination(null);
+            hideDestinationDetail();
+            
+            // Add the AirBnB marker and show its popup after the map finishes moving
+            map.once('moveend', () => {
+                // Create custom HTML element for the AirBnB marker
+                const markerEl = document.createElement('div');
+                markerEl.className = 'airbnb-marker';
+                markerEl.innerHTML = `<i class="fas fa-home" style="font-size: 20px;"></i>`;
+                
+                // Create popup content
+                const popup = new mapboxgl.Popup({
+                    offset: 25,
+                    closeButton: true,
+                    closeOnClick: true,
+                    className: 'airbnb-popup'
+                })
+                .setHTML(`
+                    <h3 class="airbnb-popup-title">${airbnbLocation.name}</h3>
+                    <p class="airbnb-popup-text">${airbnbLocation.address}</p>
+                    <p class="airbnb-popup-text">${airbnbLocation.description}</p>
+                `);
+                
+                // Add the marker to the map and show popup immediately
+                const airbnbMarker = new mapboxgl.Marker(markerEl)
+                    .setLngLat(airbnbLocation.coords)
+                    .setPopup(popup)
+                    .addTo(map);
+                
+                // Open popup immediately
+                airbnbMarker.togglePopup();
+            });
+            
+            showToast('🏠 Mostrando nuestro AirBnB');
+        }
+
+        function filterDestinations(searchText) {
+            const listItems = document.querySelectorAll('#destination-list li');
+            let visibleCount = 0;
+            
+            for (const item of listItems) {
+                const destinationName = item.querySelector('.destination-name').textContent.toLowerCase();
+                const isVisible = destinationName.includes(searchText.toLowerCase());
+                item.style.display = isVisible ? 'block' : 'none';
+                
+                if (isVisible) visibleCount++;
+            }
+            
+            // Update count
+            document.getElementById('destination-count').textContent = `(${visibleCount}/${currentDestinations.length})`;
+        }
+
+        function setActiveDestination(destination) {
+            // Remove active class from previous selection
+            if (activeDestination !== null) {
+                const prevEl = document.querySelector(`.destination-card[data-index="${activeDestination}"]`);
+                if (prevEl) prevEl.classList.remove('active');
+            }
+            
+            // Set new active destination
+            activeDestination = destination;
+            
+            // Add active class to new selection
+            if (activeDestination !== null) {
+                const el = document.querySelector(`.destination-card[data-index="${activeDestination}"]`);
+                if (el) el.classList.add('active');
+            }
+            
+            // On mobile, close sidebar after selecting destination
+            if (isMobile && activeDestination !== null && document.getElementById('sidebar').classList.contains('open')) {
+                toggleSidebar();
+            }
+        }
+
+        function showLoader() {
+            document.getElementById('loader').style.display = 'block';
+        }
+
+        function hideLoader() {
+            document.getElementById('loader').style.display = 'none';
+        }
+
+        function refreshDestinationsList() {
+            const listElement = document.getElementById('destination-list');
+            // Clear existing list
+            listElement.innerHTML = '';
+            
+            // Update count
+            document.getElementById('destination-count').textContent = `(${currentDestinations.length})`;
+            
+            // Repopulate list
+            currentDestinations.forEach((dest, index) => {
+                const listItem = document.createElement('li');
+                listItem.className = 'destination-card';
+                listItem.setAttribute('data-index', index);
+                listItem.setAttribute('data-lng', dest.coords[0]);
+                listItem.setAttribute('data-lat', dest.coords[1]);
+                listItem.setAttribute('data-zoom', dest.zoom);
+                listItem.setAttribute('data-pitch', dest.pitch);
+                
+                listItem.innerHTML = `
+                    <div class="destination-content">
+                        <div class="destination-icon">
+                            <i class="fas ${dest.icon || 'fa-map-marker-alt'}"></i>
+                        </div>
+                        <div class="destination-info">
+                            <h3 class="destination-name">${dest.name}</h3>
+                        </div>
+                    </div>
+                `;
+                
+                listItem.addEventListener('click', () => handleDestinationClick(index));
+                listElement.appendChild(listItem);
+            });
+            
+            // Reset active destination
+            setActiveDestination(null);
+            hideDestinationDetail();
+        }
+
+        // 6. Initialize Mapbox Map
+        const map = new mapboxgl.Map({
+            container: 'map',
+            style: 'mapbox://styles/mapbox/streets-v11',
+            center: [2.3522, 48.8566], // Paris
+            zoom: 12,
+            pitch: 45,
+            bearing: -17.6,
+            antialias: true
+        });
+
+        // 7. Populate Destination List with enhanced design
+        refreshDestinationsList();
+
+        // 8. Handle Clicks on Destinations
+        function handleDestinationClick(index) {
+            const destination = currentDestinations[index];
+            showLoader();
+            
+            // Update active destination
+            setActiveDestination(index);
+            
+            // Fly to destination
+            map.flyTo({
+                center: destination.coords,
+                zoom: destination.zoom,
+                pitch: destination.pitch,
+                bearing: map.getBearing(),
+                essential: true,
+                speed: 1.2,
+                curve: 1.4,
+            });
+            
+            // Show destination detail panel
+            showDestinationDetail(destination);
+            
+            // Hide loader after map movement is complete
+            map.once('moveend', hideLoader);
+        }
+
+        // 9. Set up map events
+        map.on('load', () => {
+            // Add 3D Buildings Layer
+            map.addLayer({
+                'id': 'add-3d-buildings',
+                'source': 'composite',
+                'source-layer': 'building',
+                'filter': ['==', 'extrude', 'true'],
+                'type': 'fill-extrusion',
+                'minzoom': 14,
+                'paint': {
+                    'fill-extrusion-color': [
+                        'interpolate',
+                        ['linear'],
+                        ['get', 'height'],
+                        0, '#d9d0c9',
+                        50, '#f2d2a9',
+                        100, '#d1b48c',
+                        200, '#b0a999'
+                    ],
+                    'fill-extrusion-height': [
+                        'interpolate',
+                        ['linear'],
+                        ['get', 'height'],
+                        0, 0,
+                        10, 10,
+                        50, 50,
+                        100, 100,
+                        200, 200
+                    ],
+                    'fill-extrusion-base': [
+                        'interpolate',
+                        ['linear'],
+                        ['get', 'min_height'],
+                        0, 0,
+                        10, 10
+                    ],
+                    'fill-extrusion-opacity': 0.85
+                }
+            });
+
+            // Initialize Threebox
+            window.tb = new Threebox(
+                map,
+                map.getCanvas().getContext('webgl'),
+                {
+                    defaultLights: true,
+                    enableSelectingFeatures: false
+                }
+            );
+
+            // Add custom Threebox layer
+            map.addLayer({
+                id: 'threebox-custom-layer',
+                type: 'custom',
+                renderingMode: '3d',
+                onAdd: function (map, gl) {
+                    console.log("Threebox layer added.");
+                },
+                render: function (gl, matrix) {
+                    tb.update();
+                }
+            });
+
+            // Add custom markers for destinations
+            function refreshMarkers() {
+                // Remove existing markers
+                document.querySelectorAll('.custom-marker').forEach(marker => {
+                    marker.remove();
+                });
+                
+                currentDestinations.forEach((destination, idx) => {
+                    // Create a custom HTML element for the marker
+                    const markerEl = document.createElement('div');
+                    markerEl.className = 'custom-marker';
+                    markerEl.style.width = '30px';
+                    markerEl.style.height = '30px';
+                    markerEl.style.borderRadius = '50%';
+                    markerEl.style.backgroundColor = isGirlieMode ? '#ff80ab' : 'var(--primary-color)';
+                    markerEl.style.color = 'white';
+                    markerEl.style.display = 'flex';
+                    markerEl.style.alignItems = 'center';
+                    markerEl.style.justifyContent = 'center';
+                    markerEl.style.boxShadow = isGirlieMode ? '0 2px 6px rgba(244, 143, 177, 0.6)' : '0 2px 6px rgba(0,0,0,0.3)';
+                    markerEl.style.cursor = 'pointer';
+                    markerEl.innerHTML = `<i class="fas ${destination.icon || 'fa-map-marker-alt'}" style="font-size: 16px;"></i>`;
+                    
+                    // Add a marker at each destination position
+                    new mapboxgl.Marker(markerEl)
+                        .setLngLat(destination.coords)
+                        .addTo(map);
+                        
+                    // Add click handler to markers
+                    markerEl.addEventListener('click', () => {
+                        handleDestinationClick(idx);
+                    });
+                });
+            }
+            
+            refreshMarkers();
+            
+            // Add AirBnB marker
+            addAirBnBMarker();
+            
+            hideLoader();
+            showToast('🗼 ¡Bienvenido a París con Cris!', 4000);
+        });
+
+        // Add AirBnB marker function
+        function addAirBnBMarker() {
+            // Remove existing AirBnB marker if it exists
+            document.querySelectorAll('.airbnb-marker').forEach(marker => {
+                marker.remove();
+            });
+            
+            // Create popup content
+            const popup = new mapboxgl.Popup({
+                offset: 25,
+                closeButton: true,
+                closeOnClick: true,
+                className: 'airbnb-popup'
+            })
+            .setHTML(`
+                <h3 class="airbnb-popup-title">${airbnbLocation.name}</h3>
+                <p class="airbnb-popup-text">${airbnbLocation.address}</p>
+                <p class="airbnb-popup-text">${airbnbLocation.description}</p>
+            `);
+            
+            // Add the marker to the map
+            const airbnbMarker = new mapboxgl.Marker(markerEl)
+                .setLngLat(airbnbLocation.coords)
+                .setPopup(popup)
+                .addTo(map);
+        }
+
+        // 10. Set up event listeners
+        document.getElementById('theme-toggle').addEventListener('click', toggleGirlieMode);
+        document.getElementById('sidebar-toggle').addEventListener('click', toggleSidebar);
+        document.getElementById('reset-view').addEventListener('click', resetMapView);
+        document.getElementById('toggle-buildings').addEventListener('click', toggleBuildings);
+        document.getElementById('detail-close').addEventListener('click', hideDestinationDetail);
+        
+        document.getElementById('search-input').addEventListener('input', (e) => {
+            filterDestinations(e.target.value);
+        });
+        
+        // 11. Handle window resize
+        window.addEventListener('resize', () => {
+            isMobile = window.innerWidth <= 768;
+            
+            // On desktop, ensure sidebar is visible
+            if (!isMobile) {
+                document.getElementById('sidebar').classList.add('open');
+            }
+        });
+        
+        // Initialize responsive state
+        if (isMobile) {
+            document.getElementById('sidebar').classList.remove('open');
+        } else {
+            document.getElementById('sidebar').classList.add('open');
+        }
+        
+        // Show initial loader
+        showLoader();
+        
+        // Error handling
+        map.on('error', (e) => {
+            console.error("Mapbox GL Error:", e.error);
+            showToast('❌ An error occurred with the map');
+            hideLoader();
+        });
+    </script>
+
+</body>
+</html>
