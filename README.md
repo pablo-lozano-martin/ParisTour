@@ -10,6 +10,8 @@ Discover Paris like never before! Whether you're planning your dream trip or sim
 
 Navigate Paris effortlessly with an interactive map, curated destinations, and a personalized theme. Dive deeper into the magic with detailed insights and 3D views.
 
+> **Note:** To use this app, you need to provide your own Mapbox access token. Visit [Mapbox](https://www.mapbox.com/) to create an account and obtain your token.
+
 ---
 
 ## 🛠️ Built With
